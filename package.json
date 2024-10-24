@@ -1,12 +1,26 @@
 {
-    "name": "truffle-ai",
-    "version": "1.0.0",
-    "description": "An SDK to interact with serverless AI agents using Truffle AI",
-    "main": "index.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Truffle AI",
-    "license": "MIT"
-  }
-  
+  "name": "truffle-ai",
+  "version": "1.0.1",
+  "description": "An SDK to interact with serverless AI agents using Truffle AI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Truffle AI",
+  "license": "MIT",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/truffle-ai/truffle-ai-sdk.git"
+  },
+  "keywords": [
+    "ai",
+    "agents"
+  ],
+  "bugs": {
+    "url": "https://github.com/truffle-ai/truffle-ai-sdk/issues"
+  },
+  "homepage": "https://github.com/truffle-ai/truffle-ai-sdk#readme"
+}
