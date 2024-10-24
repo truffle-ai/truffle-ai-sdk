@@ -21,3 +21,6 @@ declare module 'truffle-ai' {
         message_history: Array<{ role: string; content: string }>;
     }
 }
+
+export = truffle_ai;
+export as namespace truffle_ai;

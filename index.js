@@ -1,2 +1,2 @@
-import TruffleAIClient from "./lib/Client";
-export { TruffleAIClient }
+const TruffleAIClient = require("./lib/Client");
+module.exports = { TruffleAIClient };

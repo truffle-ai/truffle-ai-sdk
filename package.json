@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "description": "An SDK to interact with serverless AI agents using Truffle AI",
   "main": "index.js",
+  "module": "index.mjs",
   "types": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/truffle-ai/truffle-ai-sdk/issues"
   },
-  "homepage": "https://github.com/truffle-ai/truffle-ai-sdk#readme"
+  "homepage": "https://github.com/truffle-ai/truffle-ai-sdk#readme",
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.mjs"
+    }
+  }
 }
