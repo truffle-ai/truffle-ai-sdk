@@ -2,15 +2,15 @@
 
 ## Introduction
 
-Truffle AI SDK lets you work with serverless AI agents to build applications without dealing with infrastructure. You can create, deploy, and manage your agents easily. Whether you're automating tasks, improving customer experiences, or exploring new AI features, Truffle AI helps you get started quickly and scale as needed.
+The Truffle AI SDK offers a simple way to create and manage serverless AI agents, allowing developers to build applications without worrying about infrastructure complexities. Whether it's automating workflows, enhancing customer experiences, or exploring AI capabilities, Truffle AI helps you get started quickly and scale effortlessly.
 
 ## Overview
 
-With Truffle AI SDK, developers can easily create and interact with serverless AI agents tailored to their use cases. This SDK lets you create agents, perform chat interactions, and execute agent functions—all with minimal setup.
+With the Truffle AI SDK, developers can easily create and interact with serverless AI agents tailored to their use cases. The SDK allows you to create agents, conduct chat interactions, and execute agent functions—all with minimal setup.
 
 ## Installation
 
-To install the Truffle AI SDK, use npm:
+Install the Truffle AI SDK using npm:
 
 ```sh
 npm install truffle-ai
@@ -18,21 +18,23 @@ npm install truffle-ai
 
 ## Usage
 
-To use the SDK, import the client, create an instance, and initialize an agent. You will need an API key, which can be obtained by logging in at [Truffle AI](https://www.trytruffle.ai), navigating to **Settings** > **API Keys**, and clicking **Generate New Key**.
+To use the SDK, import the client, create an instance, and initialize an agent. Obtain your API key by logging into [Truffle AI](https://www.trytruffle.ai), navigating to **Settings** > **API Keys**, and clicking **Generate New Key**
 
 ```js
 import { TruffleAIClient } from "truffle-ai";
 
-const client = new TruffleAIClient("your-api-key");
-const agent = client.initAgent("your-agent-id");
+const client = new TruffleAIClient("your-api-key"); //Use your API-key
+const agent = client.initAgent("your-agent-id"); //Each agent comes with a unique ID
 
 // Chat with the agent
 (async () => {
-  const messages = await agent.chat("Hello, how can you assist me today?");
-  console.log(messages);
+  const response = await agent.chat("Hello, how are you?");
+  console.log(response);
+})();
 
-  // Run a specific function
-  const output = await agent.run("value");
+// Run a specific function
+(async () => {
+  const output = await agent.run("Write a haiku about summer.");
   console.log(output);
 })();
 ```
@@ -41,7 +43,7 @@ const agent = client.initAgent("your-agent-id");
 
 ### Using Templates
 
-Truffle AI provides ready-made templates for common use cases, each with a unique `agentId`. This allows you to quickly initialize an agent and start interacting.
+Truffle AI provides pre-built templates for common use cases. This allows you to quickly initialize and interact with an agent using it's `agent_id`.
 
 ```js
 import { TruffleAIClient } from "truffle-ai";
@@ -50,64 +52,27 @@ import { TruffleAIClient } from "truffle-ai";
   const client = new TruffleAIClient("your-api-key");
   const agent = client.initAgent("template-agent-id");
 
-  // Chat with the pre-built agent
-  const chatResponse = await agent.chat("Tell me about your features.");
-  console.log(chatResponse);
+  // Here we are using an agent that can extract URLs
+  response = agent.chat("Can you summarize the key points from this article? https://techcrunch.com/2024/01/23/navigate-the-genai-era-with-this-startup-map/");
+  console.log(response);
 })();
 ```
 
 ### Building Custom Agents
 
-You can also build custom agents to suit your specific needs. After creating an agent through the Truffle AI platform, use its `agentId` to interact with it programmatically.
+You can create custom agents to meet your specific needs using [Truffle AI](www.trytruffle.ai). Once you add your custom agent, you can use it's `agent_id` to interact with it.
 
-```js
-import { TruffleAIClient } from "truffle-ai";
+Refer to this [tutorial](https://www.trytruffle.ai/blog).
 
-(async () => {
-  const client = new TruffleAIClient("your-api-key");
-  const customAgent = client.initAgent("custom-agent-id");
-
-  // Custom chat interaction
-  const messages = await customAgent.chat("Can you provide a custom report?");
-  console.log(messages);
-
-  // Execute a custom function
-  const result = await customAgent.run("generateCustomReport");
-  console.log(result);
-})();
-```
-
-### Integrating into Your Application
-
-Integrating Truffle AI into your application is straightforward. Just initialize an agent and call its methods. With both templates and custom agents, you have the flexibility to automate workflows, provide conversational AI, or create custom interactions.
-
-Here's an example of how to integrate Truffle AI into a Node.js project:
-
-```js
-import { TruffleAIClient } from "truffle-ai";
-
-(async () => {
-  const client = new TruffleAIClient("your-api-key");
-  const agent = client.initAgent("your-agent-id");
-
-  // Chat with the agent
-  const chatHistory = await agent.chat("What can you do?");
-  console.log(chatHistory);
-
-  // Run a specific function
-  const result = await agent.run("value");
-  console.log(result);
-})();
-```
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT](https://spdx.org/licenses/MIT.html) License.
 
 ## Contributions
 
-Contributions are welcome! If you have ideas or improvements, feel free to create a pull request or open an issue on the GitHub repository.
+Contributions are welcome! If you have ideas or improvements, feel free to open a pull request or issue on the GitHub repository.
 
 ## Support
 
-For support or queries, please contact [founders@trytruffle.ai](mailto:founders@trytruffle.ai).
+For support or questions, contact [founders@trytruffle.ai](mailto:founders@trytruffle.ai).
