@@ -60,7 +60,7 @@ import { TruffleAIClient } from "truffle-ai";
 
 ### Building Custom Agents
 
-You can create custom agents to meet your specific needs using [Truffle AI](www.trytruffle.ai). Once you add your custom agent, you can use it's `agent_id` to interact with it.
+You can create custom agents to meet your specific needs using [Truffle AI](https://www.trytruffle.ai). Once you add your custom agent, you can use it's `agent_id` to interact with it.
 
 Refer to this [tutorial](https://www.trytruffle.ai/blog).
 
