@@ -4,10 +4,6 @@
 
 The Truffle AI SDK offers a simple way to create and manage serverless AI agents, allowing developers to build applications without worrying about infrastructure complexities. Whether it's automating workflows, enhancing customer experiences, or exploring AI capabilities, Truffle AI helps you get started quickly and scale effortlessly.
 
-## Overview
-
-With the Truffle AI SDK, developers can easily create and interact with serverless AI agents tailored to their use cases. The SDK allows you to create agents, conduct chat interactions, and execute agent functions—all with minimal setup.
-
 ## Installation
 
 Install the Truffle AI SDK using npm:
@@ -18,60 +14,97 @@ npm install truffle-ai
 
 ## Usage
 
-To use the SDK, import the client, create an instance, and initialize an agent. Obtain your API key by logging into [Truffle AI](https://www.trytruffle.ai), navigating to **Settings** > **API Keys**, and clicking **Generate New Key**
+To use the SDK, you'll need an API key from [Truffle AI](https://www.trytruffle.ai). Navigate to **Settings** > **API Keys** and click **Generate New Key**.
 
-```js
-import { TruffleAIClient } from "truffle-ai";
+### Basic Usage
 
-const client = new TruffleAIClient("your-api-key"); //Use your API-key
-const agent = client.initAgent("your-agent-id"); //Each agent comes with a unique ID
+```typescript
+import { TruffleAI, Agent } from 'truffle-ai';
 
-// Chat with the agent
-(async () => {
-  const response = await agent.chat("Hello, how are you?");
-  console.log(response);
-})();
+// Initialize the client
+const client = new TruffleAI({
+  apiKey: 'your-api-key'
+});
 
-// Run a specific function
-(async () => {
-  const output = await agent.run("Write a haiku about summer.");
-  console.log(output);
-})();
+// Create and deploy an agent
+const agent = new Agent({
+  name: 'My Assistant',
+  instruction: 'You are a helpful AI assistant.',
+  model: 'gpt-4'
+});
+
+// Deploy the agent
+const deployedAgent = await client.deploy(agent);
+
+// Run a one-off task
+const result = await agent.run('Write a haiku about summer.');
+console.log(result);
+
+// Or start a chat session
+const chat = agent.createChat();
+const response = await chat.send('Hello, how are you?');
+console.log(response);
+
+// Get chat history
+const history = chat.getHistory();
 ```
 
-## Example Applications
+### Agent Configuration
 
-### Using Templates
+When creating an agent, you can specify various configuration options:
 
-Truffle AI provides pre-built templates for common use cases. This allows you to quickly initialize and interact with an agent using it's `agent_id`.
-
-```js
-import { TruffleAIClient } from "truffle-ai";
-
-(async () => {
-  const client = new TruffleAIClient("your-api-key");
-  const agent = client.initAgent("template-agent-id");
-
-  // Here we are using an agent that can extract URLs
-  response = agent.chat("Can you summarize the key points from this article? https://techcrunch.com/2024/01/23/navigate-the-genai-era-with-this-startup-map/");
-  console.log(response);
-})();
+```typescript
+const agent = new Agent({
+  name: 'Custom Assistant',
+  instruction: 'You are a specialized AI assistant.',
+  model: 'gpt-4',
+  tool: 'custom-tool-name', // Optional: specify a custom tool
+  config: {
+    temperature: 0.7,
+    // Other model-specific configurations
+  }
+});
 ```
 
-### Building Custom Agents
+### Chat Sessions
 
-You can create custom agents to meet your specific needs using [Truffle AI](https://www.trytruffle.ai). Once you add your custom agent, you can use it's `agent_id` to interact with it.
+Chat sessions maintain conversation history and context:
 
-Refer to this [tutorial](https://www.trytruffle.ai/blog).
+```typescript
+const chat = agent.createChat();
 
+// Send multiple messages
+const response1 = await chat.send('What is machine learning?');
+const response2 = await chat.send('Can you give me an example?');
+
+// Get the full conversation history
+const history = chat.getHistory();
+```
+
+## TypeScript Support
+
+The SDK is written in TypeScript and provides full type definitions out of the box. You'll get excellent IDE support and type checking for all SDK operations.
+
+## Error Handling
+
+The SDK uses standard error handling patterns:
+
+```typescript
+try {
+  const agent = new Agent({
+    name: 'Test Agent',
+    instruction: 'Test instruction',
+    model: 'gpt-4'
+  });
+  await client.deploy(agent);
+} catch (error) {
+  console.error('Failed to deploy agent:', error);
+}
+```
 
 ## License
 
 This project is licensed under the [MIT](https://spdx.org/licenses/MIT.html) License.
-
-## Contributions
-
-Contributions are welcome! If you have ideas or improvements, feel free to open a pull request or issue on the GitHub repository.
 
 ## Support
 
