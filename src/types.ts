@@ -1,13 +1,9 @@
 export interface AgentConfig {
     name: string;
     instruction: string;
-    model: "gpt-4o-mini" | string;
+    model: string;
     tool?: string;
-    config?: {
-        temperature?: number;
-        [key: string]: any;
-    };
-
+    components?: string;
 }
 
 export interface ChatMessage {

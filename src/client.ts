@@ -1,20 +1,40 @@
 import { Agent } from './agent';
-import { AgentConfig, DeployedAgent, ChatMessage } from './types';
+import { AgentConfig, DeployedAgent, ChatMessage, RunResponse } from './types';
 
 export class TruffleAI {
     private apiKey: string;
     private baseUrl: string;
 
-    constructor(config: { apiKey: string; baseUrl?: string }) {
-        this.apiKey = config.apiKey;
-        this.baseUrl = config.baseUrl || 'https://www.trytruffle.ai';
+    constructor(apiKey: string, options?: { baseUrl?: string }) {
+        this.apiKey = apiKey;
+        this.baseUrl = options?.baseUrl || 'https://www.trytruffle.ai';
     }
 
-    private async makeRequest(
+    async deployAgent(config: AgentConfig): Promise<Agent> {
+        const response = await this.makeRequest('agents', 'POST', config) as { success: boolean; data: DeployedAgent };
+        
+        if (!response.success) {
+            throw new Error('Failed to deploy agent');
+        }
+
+        return new Agent(response.data.id, config, this);
+    }
+
+    async loadAgent(agentId: string): Promise<Agent> {
+        const response = await this.makeRequest(`agents/${agentId}`, 'GET') as { success: boolean; data: DeployedAgent };
+        
+        if (!response.success) {
+            throw new Error('Failed to load agent');
+        }
+
+        return new Agent(response.data.id, response.data.config, this);
+    }
+
+    async makeRequest(
         endpoint: string,
         method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-        body?: unknown
-    ) {
+        body?: any
+    ): Promise<unknown> {
         const response = await fetch(`${this.baseUrl}/api/v1/${endpoint}`, {
             method,
             headers: {
@@ -25,33 +45,18 @@ export class TruffleAI {
         });
 
         if (!response.ok) {
-            const errorData = await response.json() as { error?: string };
-            throw new Error(errorData.error || 'Request failed');
+            const error = await response.json() as { error: string };
+            throw new Error(error.error || 'Request failed');
         }
 
         return response.json();
     }
 
-    public async deploy(agent: Agent): Promise<DeployedAgent> {
-        const config = agent.getConfig();
-        const response = await this.makeRequest('agents', 'POST', config) as { success: boolean; data: DeployedAgent };
-        
-        if (response.success) {
-            agent.setDeployedId(response.data.id);
-            agent.setClient(this);
-            return response.data;
-        }
-        
-        throw new Error('Failed to deploy agent');
+    async chat(agentId: string, messages: ChatMessage[]): Promise<unknown> {
+        return this.makeRequest(
+            `agents/${agentId}/chat`,
+            'POST',
+            { messages }
+        );
     }
-
-    public async run(agentId: string, input: string) {
-        return this.makeRequest(`agents/${agentId}/run`, 'POST', {
-            input_data: input
-        });
-    }
-    
-    public async chat(agentId: string, messages: ChatMessage[]) {
-        return this.makeRequest(`agents/${agentId}/chat`, 'POST', { messages });
-    }
-} 
+}
