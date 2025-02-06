@@ -17,8 +17,11 @@ export class TruffleAI {
             throw new Error('Failed to deploy agent');
         }
 
-        return new Agent(response.data.id, config, this);
+        console.log(response.data.agent_id)
+
+        return new Agent(response.data.agent_id, config, this);
     }
+
 
     async loadAgent(agentId: string): Promise<Agent> {
         const response = await this.makeRequest(`agents/${agentId}`, 'GET') as { success: boolean; data: DeployedAgent };
@@ -27,7 +30,7 @@ export class TruffleAI {
             throw new Error('Failed to load agent');
         }
 
-        return new Agent(response.data.id, response.data.config, this);
+        return new Agent(response.data.agent_id, response.data.config, this);
     }
 
     async makeRequest(
@@ -43,6 +46,8 @@ export class TruffleAI {
             },
             body: body ? JSON.stringify(body) : undefined,
         });
+
+        console.log(response)
 
         if (!response.ok) {
             const error = await response.json() as { error: string };

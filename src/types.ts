@@ -18,7 +18,7 @@ export interface RunResponse {
 }
 
 export interface DeployedAgent {
-    id: string;
+    agent_id: string;
     config: AgentConfig;
     created_at: string;
     updated_at: string;
