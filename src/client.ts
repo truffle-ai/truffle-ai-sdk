@@ -1,67 +1,162 @@
 import { Agent } from './agent';
-import { AgentConfig, DeployedAgent, ChatMessage, RunResponse } from './types';
+import {
+    AgentConfig,
+    DeployedAgent,
+    ChatMessage,
+    ChatResponse,
+    RunResponse,
+    TruffleAIOptions,
+    TruffleError,
+    ValidationError,
+    AuthenticationError
+} from './types';
 
+/**
+ * Main client for interacting with the TruffleAI API
+ * @example
+ * const client = new TruffleAI('your-api-key');
+ * 
+ * const agent = await client.deployAgent({
+ *   name: 'My Assistant',
+ *   instruction: 'Help users with their questions',
+ *   model: 'gpt-4'
+ * });
+ */
 export class TruffleAI {
-    private apiKey: string;
-    private baseUrl: string;
+    private readonly apiKey: string;
+    private readonly baseUrl: string;
 
-    constructor(apiKey: string, options?: { baseUrl?: string }) {
-        this.apiKey = apiKey;
-        this.baseUrl = options?.baseUrl || 'https://www.trytruffle.ai';
-    }
-
-    async deployAgent(config: AgentConfig): Promise<Agent> {
-        const response = await this.makeRequest('agents', 'POST', config) as { success: boolean; data: DeployedAgent };
-        
-        if (!response.success) {
-            throw new Error('Failed to deploy agent');
+    /**
+     * Creates a new TruffleAI client instance
+     * @param apiKey Your TruffleAI API key
+     * @param options Configuration options
+     */
+    constructor(apiKey: string, options: TruffleAIOptions = {}) {
+        if (!apiKey) {
+            throw new ValidationError('API key is required');
         }
 
-        console.log(response.data.agent_id)
+        this.apiKey = apiKey;
+        this.baseUrl = options.baseUrl || 'https://www.trytruffle.ai';
+    }
+
+    /**
+     * Deploys a new agent with the specified configuration
+     * @param config Configuration for the new agent
+     * @returns A new Agent instance
+     * @throws {ValidationError} If the configuration is invalid
+     * @throws {AuthenticationError} If the API key is invalid
+     */
+    async deployAgent(config: AgentConfig): Promise<Agent> {
+        this.validateAgentConfig(config);
+
+        const response = await this.makeRequest<{ success: boolean; data: DeployedAgent }>(
+            'agents',
+            'POST',
+            config
+        );
+
+        if (!response.success) {
+            throw new TruffleError('Failed to deploy agent', 500);
+        }
 
         return new Agent(response.data.agent_id, config, this);
     }
 
-
+    /**
+     * Loads an existing agent by ID
+     * @param agentId ID of the agent to load
+     * @returns An Agent instance
+     * @throws {ValidationError} If the agent ID is invalid
+     * @throws {TruffleError} If the agent is not found
+     */
     async loadAgent(agentId: string): Promise<Agent> {
-        const response = await this.makeRequest(`agents/${agentId}`, 'GET') as { success: boolean; data: DeployedAgent };
+        if (!agentId) {
+            throw new ValidationError('Agent ID is required');
+        }
+
+        const response = await this.makeRequest<{ success: boolean; data: { config: AgentConfig } }>(
+            `agents/${agentId}`,
+            'GET'
+        );
         
         if (!response.success) {
-            throw new Error('Failed to load agent');
+            throw new TruffleError('Failed to load agent', 500);
         }
 
-        return new Agent(response.data.agent_id, response.data.config, this);
+        return new Agent(agentId, response.data.config, this);
     }
 
-    async makeRequest(
+    /**
+     * Makes an authenticated request to the TruffleAI API
+     * @template T The expected response type
+     * @param endpoint API endpoint to call
+     * @param method HTTP method
+     * @param body Optional request body
+     * @returns The response data
+     * @throws {TruffleError} If the request fails
+     */
+    async makeRequest<T>(
         endpoint: string,
         method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-        body?: any
-    ): Promise<unknown> {
-        const response = await fetch(`${this.baseUrl}/api/v1/${endpoint}`, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': this.apiKey,
-            },
-            body: body ? JSON.stringify(body) : undefined,
-        });
+        body?: unknown
+    ): Promise<T> {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/v1/${endpoint}`, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': this.apiKey
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
 
-        console.log(response)
+            if (!response.ok) {
+                const error = await response.json() as { error: string };
+                
+                if (response.status === 401) {
+                    throw new AuthenticationError(error.error);
+                }
+                throw new TruffleError(error.error || 'Request failed', response.status);
+            }
 
-        if (!response.ok) {
-            const error = await response.json() as { error: string };
-            throw new Error(error.error || 'Request failed');
+            return await response.json() as T;
+        } catch (error) {
+            if (error instanceof TruffleError) {
+                throw error;
+            }
+            throw new TruffleError('Network error', 0);
         }
-
-        return response.json();
     }
 
-    async chat(agentId: string, messages: ChatMessage[]): Promise<unknown> {
-        return this.makeRequest(
+    /**
+     * Initiates a chat session with an agent
+     * @param agentId ID of the agent to chat with
+     * @param messages Array of chat messages
+     * @returns The agent's response
+     */
+    async chat(agentId: string, messages: ChatMessage[]): Promise<ChatResponse> {
+        return this.makeRequest<ChatResponse>(
             `agents/${agentId}/chat`,
             'POST',
             { messages }
         );
+    }
+
+    /**
+     * Validates agent configuration
+     * @param config Agent configuration to validate
+     * @throws {ValidationError} If the configuration is invalid
+     */
+    private validateAgentConfig(config: AgentConfig): void {
+        const requiredFields: (keyof AgentConfig)[] = ['name', 'instruction', 'model'];
+        const missingFields = requiredFields.filter(field => !config[field]);
+
+        if (missingFields.length > 0) {
+            throw new ValidationError(
+                `Missing required fields: ${missingFields.join(', ')}`,
+                { fields: missingFields }
+            );
+        }
     }
 }
