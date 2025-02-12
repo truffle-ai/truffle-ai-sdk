@@ -1,6 +1,6 @@
-# Truffle AI SDK
+# TruffleAI SDK
 
-Build AI-powered applications with ease using Truffle AI. Deploy and manage AI agents with just a few lines of code.
+A TypeScript SDK for interacting with the TruffleAI API. Build and deploy AI agents with ease.
 
 ## Installation
 
@@ -14,77 +14,85 @@ npm install truffle-ai
 import { TruffleAI } from 'truffle-ai';
 
 // Initialize the client
-const truffle = new TruffleAI('your-api-key');
+const client = new TruffleAI('your-api-key');
 
-// Define your agent configuration
-const agentConfig = {
-  name: 'My Assistant',
-  instruction: 'You are a helpful AI assistant.',
-  model: 'gpt-4o-mini'
-};
-
-// Deploy the agent
-const agent = await truffle.deployAgent(agentConfig);
-
-// Run a task with your deployed agent
-const result = await agent.run('Write a haiku about summer.');
-console.log(result);
-
-// Or start a chat session
-const chat = agent.chat();
-const response = await chat.send('Hello!');
-console.log(response);
-```
-
-## Working with Existing Agents
-
-```typescript
-// Load a previously deployed agent by ID
-const agent = await truffle.loadAgent('agent-id');
-
-// Use the loaded agent
-const result = await agent.run('Hello!');
-```
-
-## Advanced Configuration
-
-```typescript
-// Define a more specialized agent
-const customerSupportAgent = {
-  name: 'Customer Support Assistant',
-  instruction: "You are a customer support specialist who helps users with their questions. Always maintain a professional and helpful tone. If you don't know something, admit it and suggest escalation.",
-  model: 'gpt-4o-mini',
-  temperature: 0.7,
-  maxTokens: 500,
-  // Add any additional configuration options
-};
-
-// Deploy with specific options
-const agent = await truffle.deployAgent(customerSupportAgent, {
-  version: '1.0',
-  environment: 'production'
+// Create and deploy a new agent
+const agent = await client.deployAgent({
+    name: 'My Assistant',
+    instruction: 'Help users with their questions',
+    model: 'gpt-4o-mini',
+    tool: 'None'
 });
+
+// Run a task with the agent
+const result = await agent.run('What is the capital of France?');
+console.log(result.data); // Paris
+
+// Load an existing agent
+// AgentId can be found in the dashboard
+const existingAgent = await client.loadAgent('agent-id');
 ```
 
-## Features
+## Core Features
 
-- 🚀 Simple, intuitive API
-- 🤖 Flexible agent configuration
-- 💬 Support for both one-off tasks and chat sessions
-- 🔄 Easy management of existing agents
-- 🛡️ Full TypeScript support
-- 🎮 Fine-grained control over agent deployment
+- 🚀 Create and deploy AI agents with minimal setup
+- 🤖 Run one-off tasks with deployed agents
+- 🔒 Type-safe with comprehensive error handling
 
-## Documentation
+## Creating Agents
 
-For detailed documentation and examples, visit [docs.trytruffle.ai](https://docs.trytruffle.ai)
+Agents are created with a configuration that defines their behavior:
+
+```typescript
+const agentConfig = {
+    name: 'My Assistant',        // Name of your agent
+    instruction: 'You are...',   // Instructions defining behavior
+    model: 'gpt-4o-mini',       // AI model to use
+    tool: 'None'                // Tool configuration
+};
+
+const agent = await client.deployAgent(agentConfig);
+```
+
+## Running Tasks
+
+Once deployed, you can run tasks with your agent:
+
+```typescript
+// Run a single task
+const result = await agent.run('Analyze this text...');
+console.log(result.data);
+
+// Load and use an existing agent
+const existingAgent = await client.loadAgent('agent-id');
+const result = await existingAgent.run('Another task...');
+```
+
+## Error Handling
+
+The SDK provides structured error handling:
+
+```typescript
+try {
+    const agent = await client.deployAgent({
+        name: 'My Assistant',
+        instruction: 'Help users with questions',
+        model: 'gpt-4o-mini'
+    });
+} catch (error) {
+    if (error instanceof ValidationError) {
+        // Handle validation errors (e.g., missing required fields)
+        console.error('Invalid configuration:', error.message);
+    } else if (error instanceof AuthenticationError) {
+        // Handle authentication errors (e.g., invalid API key)
+        console.error('Authentication failed:', error.message);
+    } else if (error instanceof TruffleError) {
+        // Handle other API errors
+        console.error('API error:', error.message);
+    }
+}
+```
 
 ## Support
 
-- Discord: [Join our community](https://discord.gg/truffle)
-- Email: support@trytruffle.ai
-- GitHub Issues: [Report bugs](https://github.com/truffle-ai/sdk/issues)
-
-## License
-
-MIT License - see LICENSE file for details
+For support, email founders@trytruffle.ai or open an issue on GitHub.
