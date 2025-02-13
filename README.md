@@ -2,6 +2,8 @@
 
 A TypeScript SDK for interacting with the TruffleAI API. Build and deploy AI agents with ease.
 
+📚 [View Full Documentation](https://docs.trytruffle.ai/introduction)
+
 ## Installation
 
 ```bash
@@ -56,7 +58,7 @@ const agent = await client.deployAgent(agentConfig);
 
 ### Using Tools
 
-Agents can be equipped with powerful tools to enhance their capabilities. Here's an example using the pre-built Tavily Research tool for web search:
+Agents can be equipped with powerful tools to enhance their capabilities. Here's an example using the pre-built Tavily Research tool for web search. For a complete list of available tools and capabilities, check out our [documentation](https://docs.trytruffle.ai/introduction).
 
 ```typescript
 // Create an agent with Tavily Research tool
