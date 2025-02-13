@@ -8,7 +8,9 @@ import {
     TruffleAIOptions,
     TruffleError,
     ValidationError,
-    AuthenticationError
+    AuthenticationError,
+    DeployResponse,
+    LoadAgentResponse
 } from './types';
 
 /**
@@ -50,11 +52,13 @@ export class TruffleAI {
     async deployAgent(config: AgentConfig): Promise<Agent> {
         this.validateAgentConfig(config);
 
-        const response = await this.makeRequest<{ success: boolean; data: DeployedAgent }>(
+        const response = await this.makeRequest<{ success: boolean; data: DeployResponse }>(
             'agents',
             'POST',
             config
         );
+
+        console.log(response);
 
         if (!response.success) {
             throw new TruffleError('Failed to deploy agent', 500);
@@ -75,16 +79,25 @@ export class TruffleAI {
             throw new ValidationError('Agent ID is required');
         }
 
-        const response = await this.makeRequest<{ success: boolean; data: { config: AgentConfig } }>(
+        const response = await this.makeRequest<{ success: boolean; data: LoadAgentResponse }>(
             `agents/${agentId}`,
             'GET'
         );
+
+        console.log(response);
         
         if (!response.success) {
             throw new TruffleError('Failed to load agent', 500);
         }
 
-        return new Agent(agentId, response.data.config, this);
+        // Transform the config to match AgentConfig interface
+        const config: AgentConfig = {
+            ...response.data.config,
+            model: response.data.config.selectedModel,
+            tool: response.data.config.selectedTool
+        };
+
+        return new Agent(agentId, config, this);
     }
 
     /**

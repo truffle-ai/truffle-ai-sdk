@@ -12,8 +12,29 @@ export interface AgentConfig {
     model: string;
     /** Optional tool configuration */
     tool?: string;
-    /** Optional components configuration */
-    components?: string;
+}
+
+/**
+ * Response from deploying a new agent
+ */
+export interface DeployResponse {
+    agent_id: string;
+    created_at: string;
+}
+
+/**
+ * Response from loading an existing agent
+ */
+export interface LoadAgentResponse {
+    config: {
+        agent_id: string;
+        name: string;
+        instruction: string;
+        selectedModel: string;
+        selectedTool?: string;
+    };
+    created_at: string;
+    updated_at: string;
 }
 
 /**
@@ -32,8 +53,8 @@ export interface ChatMessage {
 export interface ChatResponse {
     /** The message content from the agent */
     message: string;
-    /** Optional metadata about the chat response */
-    metadata?: Record<string, any>;
+    /** Optional session ID if provided */
+    session_id?: string;
 }
 
 /**
