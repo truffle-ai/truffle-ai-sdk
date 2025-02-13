@@ -54,6 +54,24 @@ const agentConfig = {
 const agent = await client.deployAgent(agentConfig);
 ```
 
+### Using Tools
+
+Agents can be equipped with powerful tools to enhance their capabilities. Here's an example using the pre-built Tavily Research tool for web search:
+
+```typescript
+// Create an agent with Tavily Research tool
+const researchAgent = await client.deployAgent({
+    name: 'Research Assistant',
+    instruction: 'You are a research assistant that helps users find accurate information from the web.',
+    model: 'gpt-4o-mini',
+    tool: 'Tavily Research'      // Enable web search capabilities
+});
+
+// Run a research task
+const result = await researchAgent.run('What are the latest developments in quantum computing?');
+console.log(result.data);        // Contains AI-processed research findings from the web
+```
+
 ## Running Tasks
 
 Once deployed, you can run tasks with your agent:
