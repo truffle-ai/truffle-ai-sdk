@@ -1,25 +1,33 @@
 {
   "name": "truffle-ai",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "An SDK to interact with serverless AI agents using Truffle AI",
-  "main": "index.js",
-  "module": "index.mjs",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build"
   },
   "author": "Truffle AI",
   "license": "MIT",
-  "directories": {
-    "lib": "lib"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/truffle-ai/truffle-ai-sdk.git"
   },
   "keywords": [
     "ai",
-    "agents"
+    "agents",
+    "llm",
+    "typescript"
   ],
   "bugs": {
     "url": "https://github.com/truffle-ai/truffle-ai-sdk/issues"
@@ -27,8 +35,22 @@
   "homepage": "https://github.com/truffle-ai/truffle-ai-sdk#readme",
   "exports": {
     ".": {
-      "require": "./index.js",
-      "import": "./index.mjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     }
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsup": "^8.0.0",
+    "rimraf": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

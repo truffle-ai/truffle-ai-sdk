@@ -1,78 +1,118 @@
-# Truffle AI SDK
+# TruffleAI SDK
 
-## Introduction
+A TypeScript SDK for interacting with the TruffleAI API. Build and deploy AI agents with ease.
 
-The Truffle AI SDK offers a simple way to create and manage serverless AI agents, allowing developers to build applications without worrying about infrastructure complexities. Whether it's automating workflows, enhancing customer experiences, or exploring AI capabilities, Truffle AI helps you get started quickly and scale effortlessly.
-
-## Overview
-
-With the Truffle AI SDK, developers can easily create and interact with serverless AI agents tailored to their use cases. The SDK allows you to create agents, conduct chat interactions, and execute agent functions—all with minimal setup.
+📚 [View Full Documentation](https://docs.trytruffle.ai/introduction)
 
 ## Installation
 
-Install the Truffle AI SDK using npm:
-
-```sh
+```bash
 npm install truffle-ai
 ```
 
-## Usage
+## Quick Start
 
-To use the SDK, import the client, create an instance, and initialize an agent. Obtain your API key by logging into [Truffle AI](https://www.trytruffle.ai), navigating to **Settings** > **API Keys**, and clicking **Generate New Key**
+```typescript
+import { TruffleAI } from 'truffle-ai';
 
-```js
-import { TruffleAIClient } from "truffle-ai";
+// Initialize the client
+const client = new TruffleAI('your-api-key');
 
-const client = new TruffleAIClient("your-api-key"); //Use your API-key
-const agent = client.initAgent("your-agent-id"); //Each agent comes with a unique ID
+// Create and deploy a new agent
+const agent = await client.deployAgent({
+    name: 'My Assistant',
+    instruction: 'Help users with their questions',
+    model: 'gpt-4o-mini',
+    tool: 'None'
+});
 
-// Chat with the agent
-(async () => {
-  const response = await agent.chat("Hello, how are you?");
-  console.log(response);
-})();
+// Run a task with the agent
+const result = await agent.run('What is the capital of France?');
+console.log(result.data); // Paris
 
-// Run a specific function
-(async () => {
-  const output = await agent.run("Write a haiku about summer.");
-  console.log(output);
-})();
+// Load an existing agent
+// AgentId can be found in the dashboard
+const existingAgent = await client.loadAgent('agent-id');
 ```
 
-## Example Applications
+## Core Features
 
-### Using Templates
+- 🚀 Create and deploy AI agents with minimal setup
+- 🤖 Run one-off tasks with deployed agents
+- 🔒 Type-safe with comprehensive error handling
 
-Truffle AI provides pre-built templates for common use cases. This allows you to quickly initialize and interact with an agent using it's `agent_id`.
+## Creating Agents
 
-```js
-import { TruffleAIClient } from "truffle-ai";
+Agents are created with a configuration that defines their behavior:
 
-(async () => {
-  const client = new TruffleAIClient("your-api-key");
-  const agent = client.initAgent("template-agent-id");
+```typescript
+const agentConfig = {
+    name: 'My Assistant',        // Name of your agent
+    instruction: 'You are...',   // Instructions defining behavior
+    model: 'gpt-4o-mini',       // AI model to use
+    tool: 'None'                // Tool configuration
+};
 
-  // Here we are using an agent that can extract URLs
-  response = agent.chat("Can you summarize the key points from this article? https://techcrunch.com/2024/01/23/navigate-the-genai-era-with-this-startup-map/");
-  console.log(response);
-})();
+const agent = await client.deployAgent(agentConfig);
 ```
 
-### Building Custom Agents
+### Using Tools
 
-You can create custom agents to meet your specific needs using [Truffle AI](https://www.trytruffle.ai). Once you add your custom agent, you can use it's `agent_id` to interact with it.
+Agents can be equipped with powerful tools to enhance their capabilities. Here's an example using the pre-built Tavily Research tool for web search. For a complete list of available tools and capabilities, check out our [documentation](https://docs.trytruffle.ai/introduction).
 
-Refer to this [tutorial](https://www.trytruffle.ai/blog).
+```typescript
+// Create an agent with Tavily Research tool
+const researchAgent = await client.deployAgent({
+    name: 'Research Assistant',
+    instruction: 'You are a research assistant that helps users find accurate information from the web.',
+    model: 'gpt-4o-mini',
+    tool: 'Tavily Research'      // Enable web search capabilities
+});
 
+// Run a research task
+const result = await researchAgent.run('What are the latest developments in quantum computing?');
+console.log(result.data);        // Contains AI-processed research findings from the web
+```
 
-## License
+## Running Tasks
 
-This project is licensed under the [MIT](https://spdx.org/licenses/MIT.html) License.
+Once deployed, you can run tasks with your agent:
 
-## Contributions
+```typescript
+// Run a single task
+const result = await agent.run('Analyze this text...');
+console.log(result.data);
 
-Contributions are welcome! If you have ideas or improvements, feel free to open a pull request or issue on the GitHub repository.
+// Load and use an existing agent
+const existingAgent = await client.loadAgent('agent-id');
+const result = await existingAgent.run('Another task...');
+```
+
+## Error Handling
+
+The SDK provides structured error handling:
+
+```typescript
+try {
+    const agent = await client.deployAgent({
+        name: 'My Assistant',
+        instruction: 'Help users with questions',
+        model: 'gpt-4o-mini'
+    });
+} catch (error) {
+    if (error instanceof ValidationError) {
+        // Handle validation errors (e.g., missing required fields)
+        console.error('Invalid configuration:', error.message);
+    } else if (error instanceof AuthenticationError) {
+        // Handle authentication errors (e.g., invalid API key)
+        console.error('Authentication failed:', error.message);
+    } else if (error instanceof TruffleError) {
+        // Handle other API errors
+        console.error('API error:', error.message);
+    }
+}
+```
 
 ## Support
 
-For support or questions, contact [founders@trytruffle.ai](mailto:founders@trytruffle.ai).
+For support, email founders@trytruffle.ai or open an issue on GitHub.
