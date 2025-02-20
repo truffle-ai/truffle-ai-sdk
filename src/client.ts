@@ -1,10 +1,8 @@
 import { Agent } from './agent';
 import {
     AgentConfig,
-    DeployedAgent,
     ChatMessage,
     ChatResponse,
-    RunResponse,
     TruffleAIOptions,
     TruffleError,
     ValidationError,

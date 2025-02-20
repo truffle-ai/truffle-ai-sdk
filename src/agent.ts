@@ -47,19 +47,33 @@ export class Agent {
     /**
      * Runs a one-off task with the agent
      * @param input The input text for the task
+     * @param json_mode Whether to return the response in JSON format
+     * @param json_format Optional JSON schema to validate the response against
      * @returns The agent's response
      * @throws {ValidationError} If the input is empty
      * @throws {TruffleError} If the request fails
      */
-    async run(input: string): Promise<RunResponse> {
+    async run(
+        input: string,
+        json_mode?: boolean,
+        json_format?: string
+    ): Promise<RunResponse> {
         if (!input?.trim()) {
             throw new ValidationError('Input is required');
         }
 
+        // Construct payload with optional fields only included when defined
+        // Using spread operator with logical AND to conditionally add properties
+        const payload = {
+            input_data: input,
+            ...(json_mode !== undefined && { json_mode }),
+            ...(json_format !== undefined && { json_format })
+        };
+
         const response = await this.client.makeRequest<RunResponse>(
             `agents/${this.id}/run`,
             'POST',
-            { input_data: input }
+            payload
         );
 
         return response;
