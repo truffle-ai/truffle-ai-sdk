@@ -32,7 +32,7 @@ export class Agent {
      * @param client The TruffleAI client instance
      */
     constructor(
-        private readonly id: string,
+        public readonly id: string,
         private readonly config: AgentConfig,
         private readonly client: TruffleAI
     ) {
@@ -90,6 +90,7 @@ export class Agent {
     /**
      * Gets the agent's unique identifier
      * @returns The agent ID
+     * @deprecated Use the id property directly instead
      */
     getId(): string {
         return this.id;

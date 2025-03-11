@@ -12,6 +12,22 @@ export interface AgentConfig {
     model: string;
     /** Optional tool configuration */
     tool?: string;
+    /** Optional document ID for RAG */
+    documentId?: string;
+}
+
+/**
+ * Represents a file-like object for Node.js environments
+ */
+export interface NodeFile {
+    /** File data as Buffer or ArrayBuffer */
+    data: Buffer | ArrayBuffer;
+    /** Filename */
+    name: string;
+    /** MIME type */
+    type: string;
+    /** File size in bytes */
+    size?: number;
 }
 
 /**

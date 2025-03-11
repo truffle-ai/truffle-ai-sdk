@@ -8,7 +8,8 @@ import {
     ValidationError,
     AuthenticationError,
     DeployResponse,
-    LoadAgentResponse
+    LoadAgentResponse,
+    NodeFile
 } from './types';
 
 /**
@@ -42,27 +43,38 @@ export class TruffleAI {
 
     /**
      * Deploys a new agent with the specified configuration
-     * @param config Configuration for the new agent
-     * @returns A new Agent instance
-     * @throws {ValidationError} If the configuration is invalid
-     * @throws {AuthenticationError} If the API key is invalid
+     * @param config The agent configuration
+     * @param ragFile Optional file to use for RAG (Browser File or Node.js file-like object)
+     * @returns A promise that resolves to the created agent
      */
-    async deployAgent(config: AgentConfig): Promise<Agent> {
-        this.validateAgentConfig(config);
-
-        const response = await this.makeRequest<{ success: boolean; data: DeployResponse }>(
+    async deployAgent(config: AgentConfig, ragFile?: File | NodeFile): Promise<Agent> {
+        // First upload RAG file if provided
+        let documentId: string | undefined;
+        
+        if (ragFile) {
+            // Upload the file
+            const uploadResult = await this.uploadRAGFile(ragFile);
+            documentId = uploadResult.documentId;
+        }
+        
+        // Include documentId in the agent configuration if available
+        const agentConfig: AgentConfig = {
+            ...config,
+            ...(documentId && { documentId })
+        };
+        
+        // Create the agent with the existing logic
+        const response = await this.makeRequest<{ success: boolean; data: { agent_id: string } }>(
             'agents',
             'POST',
-            config
+            agentConfig
         );
-
-        console.log(response);
-
+        
         if (!response.success) {
-            throw new TruffleError('Failed to deploy agent', 500);
+            throw new TruffleError('Failed to create agent', 500);
         }
-
-        return new Agent(response.data.agent_id, config, this);
+        
+        return new Agent(response.data.agent_id, agentConfig, this);
     }
 
     /**
@@ -85,7 +97,7 @@ export class TruffleAI {
         console.log(response);
         
         if (!response.success) {
-            throw new TruffleError('Failed to load agent', 500);
+            throw new TruffleError('Failed to load agent', 500, response);
         }
 
         // Transform the config to match AgentConfig interface
@@ -169,5 +181,72 @@ export class TruffleAI {
                 { fields: missingFields }
             );
         }
+    }
+    /**
+     * Uploads a file for RAG processing
+     * @param file The file to upload (Browser File or Node.js file-like object)
+     * @returns A promise that resolves to the document ID
+     */
+    async uploadRAGFile(file: File | NodeFile): Promise<{ documentId: string }> {
+        const formData = new FormData();
+        
+        // Handle both browser File objects and Node.js file-like objects
+        if ('data' in file) {
+            // Node.js environment - create a blob from the data
+            const blob = new Blob([file.data as ArrayBuffer], { type: file.type });
+            formData.append('file', blob, file.name);
+        } else {
+            // Browser environment - use File object directly
+            formData.append('file', file);
+        }
+
+        const response = await this.makeFormDataRequest<{ documentId: string }>(
+            'rag/upload',
+            'POST',
+            formData
+        );
+
+        return { documentId: response.documentId };
+    }
+
+    /**
+     * Makes a request with FormData payload
+     */
+    private async makeFormDataRequest<T>(
+        endpoint: string,
+        method: string,
+        formData: FormData
+    ): Promise<T> {
+        const url = `${this.baseUrl}/api/v1/${endpoint}`;
+
+        const headers = {
+            'x-api-key': this.apiKey
+        };
+
+        const response = await fetch(url, {
+            method,
+            headers,
+            body: formData
+        });
+
+        if (!response.ok) {
+            // Get the response text for better error debugging
+            const responseText = await response.text();
+            try {
+                // Try to parse as JSON
+                const errorData = JSON.parse(responseText) as { error: string };
+                throw new TruffleError(errorData.error || 'Request failed', response.status);
+            } catch (e) {
+                // If parsing fails, return the raw text
+                throw new TruffleError(`Request failed: ${responseText}`, response.status);
+            }
+        }
+
+        // Parse the response as JSON
+        const responseText = await response.text();
+        if (!responseText) {
+            return {} as T;
+        }
+        return JSON.parse(responseText) as T;
     }
 }

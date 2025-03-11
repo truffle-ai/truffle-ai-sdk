@@ -1,6 +1,6 @@
 {
   "name": "truffle-ai",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "An SDK to interact with serverless AI agents using Truffle AI",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
